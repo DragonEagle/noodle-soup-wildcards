@@ -2,24 +2,42 @@
 
 import json
 import os
+import sys
 
-# Open the json file
-with open('nsp_pantry.json') as json_file:
-    data = json.load(json_file)
+# Create scripts/wildcards if it doesn't exist
+if not os.path.exists("scripts/wildcards"):
+    os.makedirs("scripts/wildcards")
 
-# Create the output directory if it does not exist
-if not os.path.exists('outputs'):
-    os.makedirs('outputs')
+# Open json file and load contents into variable
+with open("nsp_pantry.json") as json_file:
+    json_data = json.load(json_file)
 
-# Iterate through each array in the json file
-for key in data:
-    # Create a file for each array
-    with open('outputs/' + key + '.txt', 'w') as output_file:
-        # Iterate through each item in the array
-        for item in data[key]:
-            # Write each item to the file
-            output_file.write(item + '\n')
-        print('Created file: ' + key + '.txt')
-        output_file.close()
+# Check if any text files with names matching json arrays exist
+for array in json_data:
+    if os.path.exists("scripts/wildcards/" + array + ".txt"):
+       text_files_exist = True
+       break
+    else:
+        text_files_exist = False
 
-json_file.close()
+if text_files_exist:
+    while True:
+        overwrite = input("WARN: This script will overwrite any changes you may have made to your Noodle Soup wildcards. Would you like to continue? (Y/n) ")
+        if overwrite == "Y" or overwrite == "y" or overwrite == "":
+            break
+        elif overwrite == "N" or overwrite == "n":
+            sys.exit()
+        else:
+            print("Invalid input. Please try again.")
+
+# Iterate through each array
+for array in json_data:
+    # Store contents of each array in its respective text file
+    with open("scripts/wildcards/" + array + ".txt", "w") as text_file:
+        for item in json_data[array]:
+            text_file.write(item + "\n")
+        print("Created " + array + ".txt")
+        text_file.close()
+
+print("NSP extraction complete; your text files are in scripts/wildcards.")
+print("Note that it's not recommended to make any changes directly to these files, as they will be overwritten when updated – make a copy instead.")
